@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Volo.Abp.AspNetCore.Mvc;
+using Volo.Abp.AspNetCore.Mvc.Libs;
 
 namespace Abp.BankManagement
 {
@@ -39,6 +40,12 @@ namespace Abp.BankManagement
                 });
 
                 builder.Services.AddApplication<BankManagementHttpApiHostModule>();
+
+                // Buraya eklendi:
+                builder.Services.Configure<AbpMvcLibsOptions>(options =>
+                {
+                    options.CheckLibs = false;
+                });
 
                 // Swagger servisini ekle
                 builder.Services.AddSwaggerGen();
@@ -72,6 +79,7 @@ namespace Abp.BankManagement
                 });
 
                 app.UseRouting();
+
                 // Authentication/Authorization devre dışı
                 // app.UseAuthentication();
                 // app.UseAuthorization();

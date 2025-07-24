@@ -1,0 +1,21 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Volo.Abp.Domain.Entities.Events.Distributed;
+
+namespace Abp.BankManagement.Etos.CardEtos
+{
+    public class CardEto : EtoBase
+    {
+        public Guid CardId { get; set; }
+        public string CardNumber { get; set; }
+        public int ExpiryMonth { get; set; }
+        public int ExpiryYear { get; set; }
+        public string CCV { get; set; }
+        public bool IsActive { get; set; }
+        public Guid AccountId { get; set; }
+        public Guid CardTypeId { get; set; }
+    }
+}
