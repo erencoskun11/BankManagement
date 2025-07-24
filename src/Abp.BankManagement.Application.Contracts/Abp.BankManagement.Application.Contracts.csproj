@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Abp.BankManagement</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Abp.BankManagement.Domain.Shared\Abp.BankManagement.Domain.Shared.csproj" />
+    <ProjectReference Include="..\Abp.BankManagement.Domain\Abp.BankManagement.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.ObjectExtending" Version="9.2.2" />
+    <PackageReference Include="Volo.Abp.Account.Application.Contracts" Version="9.2.2" />
+    <PackageReference Include="Volo.Abp.Identity.Application.Contracts" Version="9.2.2" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.Application.Contracts" Version="9.2.2" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Application.Contracts" Version="9.2.2" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Application.Contracts" Version="9.2.2" />
+    <PackageReference Include="Volo.Abp.SettingManagement.Application.Contracts" Version="9.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="FluentValidations\" />
+  </ItemGroup>
+
+</Project>

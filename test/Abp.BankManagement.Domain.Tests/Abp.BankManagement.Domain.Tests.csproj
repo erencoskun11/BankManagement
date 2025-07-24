@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Abp.BankManagement</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Abp.BankManagement.Domain\Abp.BankManagement.Domain.csproj" />
+    <ProjectReference Include="..\Abp.BankManagement.TestBase\Abp.BankManagement.TestBase.csproj" />
+  </ItemGroup>
+
+</Project>
