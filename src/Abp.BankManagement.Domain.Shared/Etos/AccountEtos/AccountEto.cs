@@ -9,6 +9,7 @@ using Volo.Abp.EventBus;
 
 namespace Abp.BankManagement.Etos.AccountEtos
 {
+    [EventName("Account.Listed")]
     public class AccountEto : EtoBase, IMultiTenant
     {
         public Guid? TenantId {  get; set; }
@@ -17,6 +18,6 @@ namespace Abp.BankManagement.Etos.AccountEtos
         public string IBAN {  get; set; }
         public DateTime OpenedAt { get; set; }
         public bool IsActive { get; set; }
-        public bool CustomerId { get; set; }
+        public Guid CustomerId { get; set; }
     }
 }

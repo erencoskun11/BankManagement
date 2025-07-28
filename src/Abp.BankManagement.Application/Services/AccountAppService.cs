@@ -10,6 +10,10 @@ using System.Threading.Tasks;
 using Abp.BankManagement.Entities;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
+using Abp.BankManagement.Publishers;
+using Volo.Abp.Account.Settings;
+using Abp.BankManagement.Data;
+using Abp.BankManagement.Etos.AccountEtos;
 
 namespace Abp.BankManagement.Services
 {
@@ -17,11 +21,13 @@ namespace Abp.BankManagement.Services
     {
         public readonly IAccountRepository _accountRepository;
         public readonly AccountManager _accountManager;
+        public readonly AccountEventPublisher _accountEventPublisher;
 
-        public AccountAppService(IAccountRepository accountRepository, AccountManager accountManager)
+        public AccountAppService(IAccountRepository accountRepository, AccountManager accountManager,AccountEventPublisher accountEventPublisher)
         {
             _accountRepository = accountRepository;
             _accountManager = accountManager;
+            _accountEventPublisher = accountEventPublisher;
         }
         public async Task<bool> CreateAsync(CreateAccountDto input)
         {
@@ -30,6 +36,17 @@ namespace Abp.BankManagement.Services
                 var createModel = ObjectMapper.Map<CreateAccountDto, AccountCreateModel>(input);
                 var account = _accountManager.Create(createModel);
                 await _accountRepository.InsertAsync(account);
+
+                var eto = new AccountCreatedEto
+                {
+                    AccountName = account.AccountName,
+                    IBAN = account.IBAN,
+                    CustomerId = account.CustomerId,
+                };
+
+                await _accountEventPublisher.PublishAccountCreatedAsync(eto);
+                
+                
                 return true;
             }
             catch (Exception ex)
@@ -88,6 +105,13 @@ namespace Abp.BankManagement.Services
                 _accountManager.Update(account, updateModel);
                 await _accountRepository.UpdateAsync(account);
 
+                var updateEto = new AccountUpdatedEto
+                {
+                    AccountName =account.AccountName,
+                    IsActive = account.IsActive,
+                    OpenedAt = account.OpenedAt
+                };
+                await _accountEventPublisher.PublishAccountUpdatedAsync(updateEto);
                 return true;
             }
             catch (Exception ex)

@@ -1,19 +1,25 @@
-﻿using Abp.BankManagement.Dtos;
-using Abp.BankManagement.Repositories;
+﻿using Abp.BankManagement.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.BankManagement.Entities;
 using Volo.Abp.Application.Services;
+using Abp.BankManagement.Dtos.AccountTyoeDtos;
+using Abp.BankManagement.Dtos.AccountTypeDtos;
 
 namespace Abp.BankManagement.Services
 {
     public class AccountTypeAppService : ApplicationService, IAccountTypeAppService
     {
         private readonly IAccountTypeRepository _accountTypeRepository;
-        public async Task<bool>CreateAsync(AccountTypeDto accountType)
+
+        public AccountTypeAppService(IAccountTypeRepository accountTypeRepository)
         {
-            var entity = ObjectMapper.Map<AccountTypeDto, AccountType>(accountType);
+            _accountTypeRepository = accountTypeRepository;
+        }
+        public async Task<bool>CreateAsync(AccountTypeCreateDto accountType)
+        {
+            var entity = ObjectMapper.Map<AccountTypeCreateDto, AccountType>(accountType);
             await _accountTypeRepository.InsertAsync(entity);
             return true;
         }

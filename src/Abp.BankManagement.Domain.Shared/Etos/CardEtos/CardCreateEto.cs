@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.EventBus;
+using Volo.Abp.MultiTenancy;
 
 namespace Abp.BankManagement.Etos.CardEtos
 {
-    public class CardCreateEto :EtoBase
+    [EventName("Card.Created")]
+    public class CardCreateEto :EtoBase,IMultiTenant
     {
         public string CardNumber { get; set; }
         public int ExpiryMonth { get; set; }
@@ -17,6 +20,6 @@ namespace Abp.BankManagement.Etos.CardEtos
         public Guid CardTypeId { get; set; }
         public bool IsActive { get; set; } = true;
 
-
+        public Guid? TenantId { get; set; }
     }
 }

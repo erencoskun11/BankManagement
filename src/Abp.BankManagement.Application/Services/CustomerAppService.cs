@@ -12,6 +12,9 @@ using Volo.Abp;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Uow;
 using Abp.BankManagement.ExceptionCodes;
+using Volo.Abp.EventBus.Distributed;
+using Abp.BankManagement.Etos.CustomerEtos;
+using Abp.BankManagement.Publishers;
 
 namespace Abp.BankManagement.Services
 {
@@ -23,15 +26,18 @@ namespace Abp.BankManagement.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly CustomerManager _customerManager;
         private readonly IStringLocalizer<BankManagementResource> _stringLocalizer;
+        private readonly CustomerEventPublisher _customerEventPublisher;
 
         public CustomerAppService(
             ICustomerRepository customerRepository,
             CustomerManager customerManager,
-            IStringLocalizer<BankManagementResource> stringLocalizer)
+            IStringLocalizer<BankManagementResource> stringLocalizer,
+            CustomerEventPublisher customerEventPublisher)
         {
             _customerRepository = customerRepository;
             _customerManager = customerManager;
             _stringLocalizer = stringLocalizer;
+            _customerEventPublisher = customerEventPublisher;
         }
 
         public async Task<bool> CreateAsync(CreateCustomerDto input)
@@ -39,6 +45,19 @@ namespace Abp.BankManagement.Services
             var customerCreateModel = ObjectMapper.Map<CreateCustomerDto,CustomerCreateModel>(input);
             var customer = _customerManager.Create(customerCreateModel);
             await _customerRepository.InsertAsync(customer);
+
+            await _customerEventPublisher.PublishCustomerCreatedAsync(new CustomerCreateEto
+            {
+                CustomerId = customer.Id,
+                TenantId = customer.TenantId,
+                FullName = customer.FullName,
+                NationalId = customer.NationalId,
+                BirthPlace = customer.BirthPlace,
+                BirthDate = customer.BirthDate,
+                RiskLimit = customer.RiskLimit
+            });
+
+
             return true;
         }
 
@@ -71,7 +90,6 @@ namespace Abp.BankManagement.Services
             var customers = await _customerRepository.GetListAsync();
             var dtos = ObjectMapper.Map<List<Customer>, List<CustomerDto>>(customers);
 
-            // Her DTO için hesap sayısını ekle
             foreach (var dto in dtos)
             {
                 dto.AccountCount = await _customerRepository.GetAccountCountAsync(dto.Id);
@@ -100,6 +118,12 @@ namespace Abp.BankManagement.Services
             var updateModel = ObjectMapper.Map<UpdateCustomerDto,CustomerUpdateModel>(input);
             var updatedCustomer = _customerManager.Update(customer, updateModel);
             await _customerRepository.UpdateAsync(customer);
+
+            // evet yayinlama su sekilde 
+            var updateEto = ObjectMapper.Map<Customer, CustomerUpdateEto>(updatedCustomer);
+            updateEto.CustomerId = updatedCustomer.Id;
+            await _customerEventPublisher.PublishCustomerUpdatedAsync(updateEto);
+
             return true;
         }
     }

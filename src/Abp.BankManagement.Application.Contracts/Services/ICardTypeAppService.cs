@@ -1,7 +1,8 @@
 ﻿using System;
-using Abp.BankManagement.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Abp.BankManagement.Dtos;
+using Abp.BankManagement.Dtos.CardTypeDtos;
 
 namespace Abp.BankManagement.Services
 {
@@ -9,7 +10,7 @@ namespace Abp.BankManagement.Services
     {
         Task<CardTypeDto>GetAsync(Guid id);
         Task<List<CardTypeDto>> GetListAsync();
-        Task<bool> CreateAsync(CardTypeDto cardType);
+        Task<bool> CreateAsync(CardTypeCreateDto cardType);
         Task<bool>UpdateAsync(CardTypeDto cardType);
         Task<bool> DeleteAsync(Guid id); 
     }

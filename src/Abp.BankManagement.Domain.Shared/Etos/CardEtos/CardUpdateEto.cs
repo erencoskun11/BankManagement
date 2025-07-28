@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.EventBus;
 
 namespace Abp.BankManagement.Etos.CardEtos
 {
-    internal class CardUpdateEto : EtoBase
+    [EventName("Card.Updated")]
+    public class CardUpdateEto : EtoBase
     {
         public Guid CardId { get; set; } 
 

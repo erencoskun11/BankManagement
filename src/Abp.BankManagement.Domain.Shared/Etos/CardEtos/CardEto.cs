@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.EventBus;
 
 namespace Abp.BankManagement.Etos.CardEtos
 {
+    [EventName("Card.Listed")]
     public class CardEto : EtoBase
     {
         public Guid CardId { get; set; }

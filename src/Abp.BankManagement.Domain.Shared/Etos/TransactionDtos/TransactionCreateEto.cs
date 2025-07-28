@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.EventBus;
+using Volo.Abp.MultiTenancy;
 
 namespace Abp.BankManagement.Etos.TransactionDtos
 {
-    public class TransactionCreateEto : EtoBase
+    [EventName("Transaction.Created")]
+    public class TransactionCreateEto : EtoBase,IMultiTenant
     {
         public Guid? TenantId { get; set; }
 

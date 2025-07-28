@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: bank_sql
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Your_password123"
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Your_password123", "-Q", "SELECT 1"]
+      interval: 10s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: bank_rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    container_name: bank_elastic
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  dbmigrator:
+    build:
+      context: .
+      dockerfile: ./src/Abp.BankManagement.DbMigrator/Dockerfile
+    container_name: bank_migrator
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DOTNET_RUNNING_IN_CONTAINER: "true"
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=BankManagementDb;User ID=sa;Password=Your_password123;TrustServerCertificate=True"
+    entrypoint:
+      - dotnet
+      - Abp.BankManagement.DbMigrator.dll
+      - --migrate
+
+  api:
+    build:
+      context: .
+      dockerfile: ./src/Abp.BankManagement.HttpApi.Host/Dockerfile
+    container_name: bank_api
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      elasticsearch:
+        condition: service_started
+      dbmigrator:
+        condition: service_completed_successfully
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DOTNET_RUNNING_IN_CONTAINER: "true"
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=BankManagementDb;User ID=sa;Password=Your_password123;TrustServerCertificate=True"
+      RabbitMQ__Connections__Default__HostName: "rabbitmq"
+      RabbitMQ__Connections__Default__Port: "5672"
+      Elasticsearch__Nodes__0: "http://elasticsearch:9200"
+
+volumes:
+  esdata:

@@ -1,8 +1,12 @@
 ﻿using Abp.BankManagement.Dtos;
 using Abp.BankManagement.Dtos.AccountDtos;
+using Abp.BankManagement.Dtos.AccountTyoeDtos;
+using Abp.BankManagement.Dtos.AccountTypeDtos;
 using Abp.BankManagement.Dtos.CardDtos;
+using Abp.BankManagement.Dtos.CardTypeDtos;
 using Abp.BankManagement.Dtos.CustomerDtos;
 using Abp.BankManagement.Dtos.TransactionDtos;
+using Abp.BankManagement.Dtos.TransactionTypeDtos;
 using Abp.BankManagement.Entities;
 using Abp.BankManagement.Models.Accounts;
 using Abp.BankManagement.Models.Cards;
@@ -32,8 +36,13 @@ public class BankManagementApplicationAutoMapperProfile : Profile
         CreateMap<UpdateTransactionDto, Transaction>();
 
         CreateMap<TransactionType, TransactionTypeDto>().ReverseMap();
+        CreateMap<TransactionType, TransactionTypeCreateDto>().ReverseMap();
+
         CreateMap<CardType, CardTypeDto>().ReverseMap();
+        CreateMap<CardType,CardTypeCreateDto>().ReverseMap();
+
         CreateMap<AccountType, AccountTypeDto>().ReverseMap();
+        CreateMap<AccountType, AccountTypeCreateDto>().ReverseMap();
 
         CreateMap<CreateTransactionDto, TransactionCreateModel>();
         CreateMap<UpdateTransactionDto, TransactionUpdateModel>();

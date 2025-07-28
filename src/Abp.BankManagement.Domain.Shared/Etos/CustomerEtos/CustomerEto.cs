@@ -4,10 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.EventBus;
+using Volo.Abp.MultiTenancy;
 
 namespace Abp.BankManagement.Etos.CustomerEtos
 {
-    public class CustomerEto : EtoBase
+    [EventName("Customer.Listed")]
+    public class CustomerEto : EtoBase, IMultiTenant
     {
         public Guid CustomerId { get; set; }
 

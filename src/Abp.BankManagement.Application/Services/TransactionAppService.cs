@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Abp.BankManagement.Entities;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
+using Abp.BankManagement.Publishers;
+using Abp.BankManagement.Etos.TransactionDtos;
 
 namespace Abp.BankManagement.Services
 {
@@ -15,11 +17,14 @@ namespace Abp.BankManagement.Services
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly TransactionManager _transactionManager;
-
-        public TransactionAppService(ITransactionRepository transactionRepository,TransactionManager transactionManager)
+        private readonly TransactionEventPublisher _transactionEventPublisher;
+        
+        public TransactionAppService(ITransactionRepository transactionRepository,TransactionManager transactionManager,
+            TransactionEventPublisher transactionEventPublisher)
         {
             _transactionRepository = transactionRepository;
             _transactionManager = transactionManager;
+            _transactionEventPublisher = transactionEventPublisher;
         }
 
         public async Task<bool> CreateAsync(CreateTransactionDto input)
@@ -27,10 +32,21 @@ namespace Abp.BankManagement.Services
             var createModel = ObjectMapper.Map<CreateTransactionDto, TransactionCreateModel>(input);
             var transaction = _transactionManager.Create(createModel); 
             await _transactionRepository.InsertAsync(transaction);
+
+            var eto = new TransactionCreateEto
+            {
+                Amount = transaction.Amount,
+                Description = transaction.Description,
+                TransactionDate = transaction.TransactionDate,
+                AccountId = transaction.AccountId,
+                CardId = transaction.CardId,
+                TransactionTypeId = transaction.TransactionTypeId,
+            };
+            await _transactionEventPublisher.PublishTransactionCreatedAsync(eto);
+            
+            
             return true;
         }
-
-
         public async Task<bool> DeleteAsync(Guid id)
         {
             await _transactionRepository.DeleteAsync(id);
@@ -85,13 +101,26 @@ namespace Abp.BankManagement.Services
             var transaction = await _transactionRepository.GetAsync(id);
             if(transaction == null)
             {
-                throw new UserFriendlyException($"Transaction with Id '{id}' not found.");
+                throw new UserFriendlyException($"Transaction with Id '{id}' not found.");// bunu degistirmeliyim bu sekilde olmaz 
 
             }
 
             var updateModel = ObjectMapper.Map<UpdateTransactionDto,TransactionUpdateModel>(input);
-            var updateTransaction = _transactionManager.Update(transaction, updateModel);
-            await _transactionRepository.UpdateAsync(updateTransaction);
+            var updatedTransaction = _transactionManager.Update(transaction, updateModel);
+            await _transactionRepository.UpdateAsync(updatedTransaction);
+
+            var updateEto = new TransactionUpdateEto
+            {
+                Amount = updatedTransaction.Amount,
+                Description = updatedTransaction.Description,
+                TransactionDate = updatedTransaction.TransactionDate,
+                AccountId = updatedTransaction.AccountId,
+                CardId = updatedTransaction.CardId,
+                TransactionTypeId = updatedTransaction.TransactionTypeId,
+            };
+
+            await _transactionEventPublisher.PublishTransactionUpdatedAsync(updateEto);
+            
             return true;
         }
 

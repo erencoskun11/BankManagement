@@ -10,6 +10,8 @@ using Abp.BankManagement.Entities;
 using Volo.Abp.Application.Services;
 using Volo.Abp.ObjectMapping;
 using Abp.BankManagement.Models.Cards;
+using Abp.BankManagement.Publishers;
+using Abp.BankManagement.Etos.CardEtos;
 namespace Abp.BankManagement.Services
 {
     public class CardAppService : ApplicationService, ICardAppService
@@ -18,16 +20,19 @@ namespace Abp.BankManagement.Services
         private readonly IObjectMapper _ObjectMapper;
         private readonly CardManager _cardManager;
         private readonly IStringLocalizer<BankManagementResource> _localizer;
+        private readonly CardEventPublisher _cardEventPublisher; 
 
         public CardAppService(ICardRepository cardRepository, 
             IObjectMapper ObjectMapper,
             CardManager cardManager,
-            IStringLocalizer<BankManagementResource> localizer)
+            IStringLocalizer<BankManagementResource> localizer,
+            CardEventPublisher cardEventPublisher)
         {
             _cardRepository = cardRepository;
             _ObjectMapper = ObjectMapper;
             _cardManager = cardManager;
             _localizer = localizer;
+            _cardEventPublisher = cardEventPublisher;
         }
 
         public async Task<bool> CreateAsync(CreateCardDto input)
@@ -36,6 +41,18 @@ namespace Abp.BankManagement.Services
             var card = _cardManager.Create(createModel);
 
             await _cardRepository.InsertAsync(card);
+
+            var eto = new CardCreateEto
+            {
+                CardNumber = card.CardNumber,
+                ExpiryYear = card.ExpiryYear,
+                ExpiryMonth = card.ExpiryMonth,
+                CCV = card.CCV,
+                AccountId = card.AccountId,
+                CardTypeId = card.CardTypeId,
+                IsActive = card.IsActive
+            };
+            await _cardEventPublisher.PublicCardCreateAsync(eto);
             return true;
         }
 
@@ -87,6 +104,21 @@ namespace Abp.BankManagement.Services
 
             var updateModel = ObjectMapper.Map<UpdateCardDto, CardUpdateModel>(input);
             await _cardRepository.UpdateAsync(card);
+
+            var eto = new CardUpdateEto
+            {
+                CardId = card.Id,
+                CardNumber = card.CardNumber,
+                ExpiryMonth = card.ExpiryMonth,
+                ExpiryYear = card.ExpiryYear,
+                CCV = card.CCV,
+                AccountId = card.AccountId,
+                CardTypeId = card.CardTypeId,
+                IsActive = card.IsActive
+            };
+            await _cardEventPublisher.PublishCardUpdatedAsync(eto);
+
+
             return true;
         }
     }

@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.EventBus;
+using Volo.Abp.MultiTenancy;
 
 namespace Abp.BankManagement.Etos.CustomerEtos
 {
-
-    public class CustomerUpdateEto : EtoBase
+    [EventName("Customer.Updated")]
+    public class CustomerUpdateEto : EtoBase, IMultiTenant
     {
         public Guid CustomerId { get; set; }  // Güncellenecek müşteri ID'si
 

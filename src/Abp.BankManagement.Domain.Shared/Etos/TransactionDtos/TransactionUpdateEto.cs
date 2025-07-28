@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities.Events.Distributed;
+using Volo.Abp.MultiTenancy;
 
 namespace Abp.BankManagement.Etos.TransactionDtos
 {
-    public class TransactionUpdateEto:EtoBase
+    public class TransactionUpdateEto:EtoBase,IMultiTenant
     {
         public Guid TransactionId { get; set; }  // Güncellenecek Transaction ID'si
 

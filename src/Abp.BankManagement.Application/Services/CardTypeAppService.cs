@@ -1,10 +1,12 @@
 ﻿using System;
-using Abp.BankManagement.Dtos;
 using Abp.BankManagement.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.BankManagement.Entities;
 using Volo.Abp.Application.Services;
+using Abp.BankManagement.Dtos.CardTypeDtos;
+using Abp.BankManagement.Dtos;
+using Nest;
 
 namespace Abp.BankManagement.Services
 {
@@ -17,9 +19,12 @@ namespace Abp.BankManagement.Services
             _cardTypeRepository = cardTypeRepository;
         }
 
-        public async Task<bool> CreateAsync(CardTypeDto cardType)
+        public async Task<bool> CreateAsync(CardTypeCreateDto cardType)
         {
-            var entity = ObjectMapper.Map<CardTypeDto, CardType>(cardType);
+            var entity = new CardType();
+            entity.Name = cardType.Name;
+
+           
             await _cardTypeRepository.InsertAsync(entity);
             return true;
         }

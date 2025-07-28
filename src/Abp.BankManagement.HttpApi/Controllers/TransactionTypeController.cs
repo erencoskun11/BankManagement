@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Abp.BankManagement.Dtos;
+using Abp.BankManagement.Dtos.TransactionTypeDtos;
 using Abp.BankManagement.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,15 +11,15 @@ namespace Abp.BankManagement.Controllers
     [ApiController]
     public class TransactionTypeController : BankManagementController
     {
-        private readonly ITransactionTypeService _transactionTypeService;
+        private readonly ITransactionTypeAppService _transactionTypeService;
 
-        public TransactionTypeController(ITransactionTypeService transactionTypeService)
+        public TransactionTypeController(ITransactionTypeAppService transactionTypeService)
         {
             _transactionTypeService = transactionTypeService;
         }
 
         [HttpPost]
-        public async Task<bool> Create([FromBody] TransactionTypeDto input)
+        public async Task<bool> Create([FromBody] TransactionTypeCreateDto input)
         {
             return await _transactionTypeService.CreateAsync(input);
         }

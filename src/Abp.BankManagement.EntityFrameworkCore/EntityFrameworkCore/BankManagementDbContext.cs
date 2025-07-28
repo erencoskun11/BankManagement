@@ -59,15 +59,42 @@ public class BankManagementDbContext :
 
         builder.ApplyConfigurationsFromAssembly(typeof(BankManagementDbContext).Assembly);
         builder.ConfigureBankManagement();
-        // ABP module configurations
         builder.ConfigurePermissionManagement();
         builder.ConfigureSettingManagement();
         builder.ConfigureBackgroundJobs();
-        builder.ConfigureAuditLogging(); 
+        builder.ConfigureAuditLogging();
         builder.ConfigureIdentity();
         builder.ConfigureOpenIddict();
         builder.ConfigureFeatureManagement();
         builder.ConfigureTenantManagement();
-        
+
+        // --------------------------------------------------
+        // Aşağıda lookup entity’leri için GUID default ataması:
+        builder.Entity<CardType>(b =>
+        {
+            b.Property(x => x.Id)
+             .HasDefaultValueSql("NEWID()")
+             .ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<AccountType>(b =>
+        {
+            b.Property(x => x.Id)
+             .HasDefaultValueSql("NEWID()")
+             .ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<TransactionType>(b =>
+        {
+            b.Property(x => x.Id)
+             .HasDefaultValueSql("NEWID()")
+             .ValueGeneratedOnAdd();
+        });
+        builder.Entity<TransactionType>(b =>
+        {
+            b.Property(x => x.Id)
+             .ValueGeneratedOnAdd();
+        });
+        // --------------------------------------------------
     }
 }

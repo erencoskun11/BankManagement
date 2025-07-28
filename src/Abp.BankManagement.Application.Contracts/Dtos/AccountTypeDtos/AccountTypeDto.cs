@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Abp.BankManagement.Dtos
+namespace Abp.BankManagement.Dtos.AccountTyoeDtos
 {
     public class AccountTypeDto
     {
