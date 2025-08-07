@@ -1,52 +1,74 @@
 ﻿using Abp.BankManagement.Dtos.AccountDtos;
+using Abp.BankManagement.Entities;
 using Abp.BankManagement.ExceptionCodes;
 using Abp.BankManagement.Managers;
 using Abp.BankManagement.Models.Accounts;
 using Abp.BankManagement.Repositories;
+using Abp.BankManagement.Etos.AccountEtos;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Abp.BankManagement.Entities;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
-using Abp.BankManagement.Publishers;
-using Volo.Abp.Account.Settings;
-using Abp.BankManagement.Data;
-using Abp.BankManagement.Etos.AccountEtos;
+using Volo.Abp.EventBus.Distributed;
 
 namespace Abp.BankManagement.Services
 {
     public class AccountAppService : ApplicationService, IAccountAppService
     {
-        public readonly IAccountRepository _accountRepository;
-        public readonly AccountManager _accountManager;
-        public readonly AccountEventPublisher _accountEventPublisher;
+        private readonly IAccountRepository _accountRepository;
+        private readonly AccountManager _accountManager;
+        private readonly IDistributedEventBus _distributedEventBus;
 
-        public AccountAppService(IAccountRepository accountRepository, AccountManager accountManager,AccountEventPublisher accountEventPublisher)
+        public AccountAppService(
+            IAccountRepository accountRepository,
+            AccountManager accountManager,
+            IDistributedEventBus distributedEventBus)
         {
             _accountRepository = accountRepository;
             _accountManager = accountManager;
-            _accountEventPublisher = accountEventPublisher;
+            _distributedEventBus = distributedEventBus;
         }
-        public async Task<bool> CreateAsync(CreateAccountDto input)
+
+        public async Task<bool> BulkCreateAsync(List<CreateAccountDto> accounts)
         {
-            try
+            foreach (var dto in accounts)
             {
-                var createModel = ObjectMapper.Map<CreateAccountDto, AccountCreateModel>(input);
-                var account = _accountManager.Create(createModel);
+                var model = ObjectMapper.Map<CreateAccountDto, AccountCreateModel>(dto);
+                var account = _accountManager.Create(model);
                 await _accountRepository.InsertAsync(account);
 
                 var eto = new AccountCreatedEto
                 {
                     AccountName = account.AccountName,
                     IBAN = account.IBAN,
-                    CustomerId = account.CustomerId,
+                    CustomerId = account.CustomerId
                 };
 
-                await _accountEventPublisher.PublishAccountCreatedAsync(eto);
-                
-                
+                await _distributedEventBus.PublishAsync(eto);
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CreateAsync(CreateAccountDto input)
+        {
+            try
+            {
+                var model = ObjectMapper.Map<CreateAccountDto, AccountCreateModel>(input);
+                var account = _accountManager.Create(model);
+                await _accountRepository.InsertAsync(account);
+
+               var eto = new AccountCreatedEto
+                {
+                    AccountName = account.AccountName,
+                    IBAN = account.IBAN,
+                    CustomerId = account.CustomerId
+                };
+
+                await _distributedEventBus.PublishAsync(eto);
+
                 return true;
             }
             catch (Exception ex)
@@ -55,7 +77,6 @@ namespace Abp.BankManagement.Services
                 throw;
             }
         }
-
 
         public async Task<bool> DeleteAsync(Guid id)
         {
@@ -101,17 +122,19 @@ namespace Abp.BankManagement.Services
                     throw new UserFriendlyException(AccountExceptionCodes.NotFoundException);
                 }
 
-                var updateModel = ObjectMapper.Map<UpdateAccountDto, AccountUpdateModel>(input);
-                _accountManager.Update(account, updateModel);
+                var model = ObjectMapper.Map<UpdateAccountDto, AccountUpdateModel>(input);
+                _accountManager.Update(account, model);
                 await _accountRepository.UpdateAsync(account);
 
-                var updateEto = new AccountUpdatedEto
+                var eto = new AccountUpdatedEto
                 {
-                    AccountName =account.AccountName,
+                    AccountName = account.AccountName,
                     IsActive = account.IsActive,
                     OpenedAt = account.OpenedAt
                 };
-                await _accountEventPublisher.PublishAccountUpdatedAsync(updateEto);
+
+                await _distributedEventBus.PublishAsync(eto);
+
                 return true;
             }
             catch (Exception ex)
@@ -120,9 +143,5 @@ namespace Abp.BankManagement.Services
                 throw;
             }
         }
-
-
     }
 }
-    
-

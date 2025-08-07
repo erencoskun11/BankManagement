@@ -1,15 +1,15 @@
 ﻿using Abp.BankManagement.Dtos.TransactionDtos;
+using Abp.BankManagement.Entities;
 using Abp.BankManagement.Managers;
 using Abp.BankManagement.Models.Transactions;
 using Abp.BankManagement.Repositories;
+using Abp.BankManagement.Etos.TransactionDtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Abp.BankManagement.Entities;
 using Volo.Abp;
 using Volo.Abp.Application.Services;
-using Abp.BankManagement.Publishers;
-using Abp.BankManagement.Etos.TransactionDtos;
+using Volo.Abp.EventBus.Distributed;
 
 namespace Abp.BankManagement.Services
 {
@@ -17,20 +17,46 @@ namespace Abp.BankManagement.Services
     {
         private readonly ITransactionRepository _transactionRepository;
         private readonly TransactionManager _transactionManager;
-        private readonly TransactionEventPublisher _transactionEventPublisher;
-        
-        public TransactionAppService(ITransactionRepository transactionRepository,TransactionManager transactionManager,
-            TransactionEventPublisher transactionEventPublisher)
+        private readonly IDistributedEventBus _distributedEventBus;
+
+        public TransactionAppService(
+            ITransactionRepository transactionRepository,
+            TransactionManager transactionManager,
+            IDistributedEventBus distributedEventBus)
         {
             _transactionRepository = transactionRepository;
             _transactionManager = transactionManager;
-            _transactionEventPublisher = transactionEventPublisher;
+            _distributedEventBus = distributedEventBus;
+        }
+
+        public async Task<bool> BulkCreateAsync(IEnumerable<CreateTransactionDto> transactions)
+        {
+            foreach (var dto in transactions)
+            {
+                var model = ObjectMapper.Map<CreateTransactionDto, TransactionCreateModel>(dto);
+                var transaction = _transactionManager.Create(model);
+                await _transactionRepository.InsertAsync(transaction);
+
+                var eto = new TransactionCreateEto
+                {
+                    Amount = transaction.Amount,
+                    Description = transaction.Description,
+                    TransactionDate = transaction.TransactionDate,
+                    AccountId = transaction.AccountId,
+                    CardId = transaction.CardId,
+                    TransactionTypeId = transaction.TransactionTypeId
+                };
+
+                await _distributedEventBus.PublishAsync(eto);
+            }
+
+            return true;
         }
 
         public async Task<bool> CreateAsync(CreateTransactionDto input)
         {
-            var createModel = ObjectMapper.Map<CreateTransactionDto, TransactionCreateModel>(input);
-            var transaction = _transactionManager.Create(createModel); 
+            var model = ObjectMapper.Map<CreateTransactionDto, TransactionCreateModel>(input);
+            var transaction = _transactionManager.Create(model);
             await _transactionRepository.InsertAsync(transaction);
 
             var eto = new TransactionCreateEto
@@ -40,20 +66,18 @@ namespace Abp.BankManagement.Services
                 TransactionDate = transaction.TransactionDate,
                 AccountId = transaction.AccountId,
                 CardId = transaction.CardId,
-                TransactionTypeId = transaction.TransactionTypeId,
+                TransactionTypeId = transaction.TransactionTypeId
             };
-            await _transactionEventPublisher.PublishTransactionCreatedAsync(eto);
-            
-            
+
+            await _distributedEventBus.PublishAsync(eto);
             return true;
         }
+
         public async Task<bool> DeleteAsync(Guid id)
         {
             await _transactionRepository.DeleteAsync(id);
             return true;
         }
-
-       
 
         public async Task<TransactionDto> GetAsync(Guid id)
         {
@@ -84,45 +108,37 @@ namespace Abp.BankManagement.Services
             var transactions = await _transactionRepository.GetByTypeIdAsync(transactionTypeId);
             return ObjectMapper.Map<List<Transaction>, List<TransactionDto>>(transactions);
         }
-        
-
 
         public async Task<List<TransactionDto>> GetListAsync()
         {
-            var transaction = await _transactionRepository.GetListAsync();
-            return ObjectMapper.Map<List<Transaction>, List<TransactionDto>>(transaction);
-           
+            var transactions = await _transactionRepository.GetListAsync();
+            return ObjectMapper.Map<List<Transaction>, List<TransactionDto>>(transactions);
         }
 
-        
-
-        public async Task<bool> UpdateAsync(Guid id,UpdateTransactionDto input)
+        public async Task<bool> UpdateAsync(Guid id, UpdateTransactionDto input)
         {
             var transaction = await _transactionRepository.GetAsync(id);
-            if(transaction == null)
+            if (transaction == null)
             {
-                throw new UserFriendlyException($"Transaction with Id '{id}' not found.");// bunu degistirmeliyim bu sekilde olmaz 
-
+                throw new UserFriendlyException("Transaction not found", $"No transaction exists with ID: {id}");
             }
 
-            var updateModel = ObjectMapper.Map<UpdateTransactionDto,TransactionUpdateModel>(input);
+            var updateModel = ObjectMapper.Map<UpdateTransactionDto, TransactionUpdateModel>(input);
             var updatedTransaction = _transactionManager.Update(transaction, updateModel);
             await _transactionRepository.UpdateAsync(updatedTransaction);
 
-            var updateEto = new TransactionUpdateEto
+            var eto = new TransactionUpdateEto
             {
                 Amount = updatedTransaction.Amount,
                 Description = updatedTransaction.Description,
                 TransactionDate = updatedTransaction.TransactionDate,
                 AccountId = updatedTransaction.AccountId,
                 CardId = updatedTransaction.CardId,
-                TransactionTypeId = updatedTransaction.TransactionTypeId,
+                TransactionTypeId = updatedTransaction.TransactionTypeId
             };
 
-            await _transactionEventPublisher.PublishTransactionUpdatedAsync(updateEto);
-            
+            await _distributedEventBus.PublishAsync(eto);
             return true;
         }
-
     }
 }

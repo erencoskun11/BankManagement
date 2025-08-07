@@ -30,7 +30,7 @@ namespace Abp.BankManagement.Publishers
 
         public async Task PublishCardUpdatedAsync(CardUpdateEto cardUpdateEto)
         {
-
+            await _distributedEventBus.PublishAsync(cardUpdateEto);
         }
 
     }
