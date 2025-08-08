@@ -13,7 +13,7 @@ namespace Abp.BankManagement.Services
         Task<bool> CreateAsync(CreateCardDto input);
         Task<bool> UpdateAsync(UpdateCardDto input);
         Task<bool> DeleteAsync(Guid id);
-
+        Task<bool> BulkCreateAsync(List<CreateCardDto> cards);
 
         Task<CardDto> GetByCardNumberAsync(string cardNumber);
         Task<List<CardDto>> GetExpiredCardsAsync();
