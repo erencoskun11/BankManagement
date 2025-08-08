@@ -23,9 +23,9 @@ namespace Abp.BankManagement.Dtos.CardDtos
         public bool IsActive { get; set; }
 
         [Required]
-        public int AccountId { get; set; }
+        public Guid AccountId { get; set; }
 
         [Required]
-        public int CardTypeId { get; set; }
+        public Guid CardTypeId { get; set; }
     }
 }

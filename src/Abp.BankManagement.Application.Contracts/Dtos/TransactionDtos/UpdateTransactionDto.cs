@@ -14,6 +14,6 @@ namespace Abp.BankManagement.Dtos.TransactionDtos
 
         public Guid? CardId { get; set; }
 
-        public int TransactionTypeId { get; set; }
+        public Guid TransactionTypeId { get; set; }
     }
 }

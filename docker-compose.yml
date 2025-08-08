@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   sqlserver:
@@ -33,6 +31,12 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
 
+  redis:
+    image: redis:7
+    container_name: bank_redis
+    ports:
+      - "6379:6379"
+
   dbmigrator:
     build:
       context: .
@@ -62,6 +66,8 @@ services:
         condition: service_started
       elasticsearch:
         condition: service_started
+      redis:
+        condition: service_started
       dbmigrator:
         condition: service_completed_successfully
     ports:
@@ -74,6 +80,8 @@ services:
       RabbitMQ__Connections__Default__HostName: "rabbitmq"
       RabbitMQ__Connections__Default__Port: "5672"
       Elasticsearch__Nodes__0: "http://elasticsearch:9200"
+      Redis__Configuration: "redis:6379"
+      Redis__InstanceName: "BankManagement:"
 
 volumes:
   esdata:

@@ -20,7 +20,7 @@ namespace Abp.BankManagement.Dtos.CardDtos
 
         public string? AccountName { get; set; } // Opsiyonel
 
-        public int CardTypeId { get; set; }
+        public Guid CardTypeId { get; set; }
 
         public string? CardTypeName { get; set; } // Opsiyonel
 
