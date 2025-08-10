@@ -16,7 +16,7 @@ namespace Abp.BankManagement.Services
         Task<bool> CreateAsync(CreateTransactionDto input);
         Task<bool> DeleteAsync(Guid id);
         Task<bool> UpdateAsync(Guid id, UpdateTransactionDto input);
-
+        Task<bool> BulkCreateAsync(IEnumerable<CreateTransactionDto>transactions);
 
     }
 }

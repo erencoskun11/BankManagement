@@ -14,6 +14,7 @@ namespace Abp.BankManagement.Services
         Task<bool> UpdateAsync(Guid id, UpdateCustomerDto input);
         Task<bool> DeleteAsync(Guid id);
 
+        Task<bool> BulkCreateAsync(List<CreateCustomerDto> customers);
 
         Task<CustomerDto> GetNationalIdAsync(string nationalId);
         Task<List<CustomerDto>> GetCustomersBornBeforeAsync(DateTime date);

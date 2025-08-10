@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Abp.BankManagement.Dtos.AccountDtos;
 using Abp.BankManagement.Dtos.CardDtos;
 using Abp.BankManagement.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -24,6 +26,13 @@ namespace Abp.BankManagement.Controllers
             {
             return await _cardAppService.CreateAsync(input);
             }
+
+        [HttpPost("bulk-create")]
+        public async Task<bool> BulkCreateAsync([FromBody] IEnumerable<CreateCardDto> cards)
+        {
+            return await _cardAppService.BulkCreateAsync(cards.ToList());
+        }
+
 
         [HttpDelete("{id}")]
         public async Task<bool> Delete(Guid id)
@@ -71,8 +80,5 @@ namespace Abp.BankManagement.Controllers
         {
             return await _cardAppService.UpdateAsync(input);
         }
-
-
-
     }
 }

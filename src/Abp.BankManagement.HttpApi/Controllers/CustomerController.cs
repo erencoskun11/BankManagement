@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Abp.BankManagement.Dtos.CustomerDtos;
+using Abp.BankManagement.Etos.CustomerEtos;
 using Abp.BankManagement.Services;
 using Microsoft.AspNetCore.Mvc;
+using Volo.Abp.EventBus.Distributed;
 
 namespace Abp.BankManagement.Controllers
 {
@@ -14,26 +16,44 @@ namespace Abp.BankManagement.Controllers
     public class CustomerController : BankManagementController
     {
         private readonly ICustomerAppService _service;
+        private readonly IDistributedEventBus _distributedEventBus;
 
-        public CustomerController(ICustomerAppService service)
+        public CustomerController(ICustomerAppService service, IDistributedEventBus distributedEventBus)
         {
             _service = service;
+            _distributedEventBus = distributedEventBus;
+
+        }
+
+        [HttpPost("test-publish")]
+        public async Task<bool> TestPublishCustomerCreatedEventAsync()
+        {
+            var eto = new CustomerCreateEto
+            {
+                CustomerId = Guid.NewGuid(),
+                FullName = "Test User",
+                NationalId = "12345678901",
+                BirthPlace = "Test City",
+                BirthDate = DateTime.UtcNow,
+                RiskLimit = 1000
+            };
+
+            await _distributedEventBus.PublishAsync(eto);
+
+            return true;
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateCustomerDto input)
+        public async Task<bool> CreateAsync([FromBody] CreateCustomerDto input)
         {
-            if (!ModelState.IsValid)
-            {
-                // ModelState’deki tüm hataları JSON olarak döndür
-                return BadRequest(ModelState);
-            }
-
-            await _service.CreateAsync(input);
-            return Ok(true);
+            return await _service.CreateAsync(input);   
         }
 
-
+        [HttpPost("bulk-create")]
+        public async Task<bool> BulkCreateAsync([FromBody] List<CreateCustomerDto> customers)
+        {
+            return await _service.BulkCreateAsync(customers);
+        }
 
 
         [HttpDelete("{id}")]

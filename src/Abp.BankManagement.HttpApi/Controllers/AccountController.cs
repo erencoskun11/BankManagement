@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Abp.BankManagement.Dtos.AccountDtos;
 using Abp.BankManagement.Services;
 using Microsoft.AspNetCore.Mvc;
+using Volo.Abp.Account;
+using IAccountAppService = Abp.BankManagement.Services.IAccountAppService;
 
 namespace Abp.BankManagement.Controllers
 {
@@ -29,6 +31,15 @@ namespace Abp.BankManagement.Controllers
         {
             return await _service.CreateAsync(dto);
         }
+        [HttpPost("bulk-create")]
+        public async Task<bool> BulkCreateAsync([FromBody] List<CreateAccountDto> accounts)
+        {
+            return await _service.BulkCreateAsync(accounts);
+        }
+
+
+
+
         [HttpDelete("{id}")]
         public async Task<bool>Delete(Guid id)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Abp.BankManagement.Dtos.TransactionDtos;
 using Abp.BankManagement.Services;
@@ -17,6 +18,14 @@ namespace Abp.BankManagement.Controllers
         {
             _transactionAppService = transactionAppService;
         }
+
+        [HttpPost("bulk-create")]
+        public async Task<bool> BulkCreateAsync([FromBody] IEnumerable<CreateTransactionDto> transactions)
+        {
+            return await _transactionAppService.BulkCreateAsync(transactions.ToList());
+        }
+
+
 
         [HttpPost]
         public async Task<bool> Create([FromBody] CreateTransactionDto input)
