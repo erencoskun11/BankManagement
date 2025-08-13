@@ -1,0 +1,27 @@
+﻿syntax = "proto3";
+
+namespace = "BankManagement.Grpc";
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply);
+}
+
+message TransactionCreateRequest {
+  string TenantId = 1;
+
+  decimal Amount = 2;
+
+  string Description = 3;
+
+  DateTime TransactionDate = 4;
+
+  string AccountId = 5;
+
+  string CardId = 6;
+
+  string TransactionTypeId = 7;
+}
+
+message TransactionCreateResponse {
+  string success = 1;
+}

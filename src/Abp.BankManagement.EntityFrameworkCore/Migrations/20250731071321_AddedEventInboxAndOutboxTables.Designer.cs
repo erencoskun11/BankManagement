@@ -4,6 +4,7 @@ using Abp.BankManagement.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Abp.BankManagement.Migrations
 {
     [DbContext(typeof(BankManagementDbContext))]
-    partial class BankManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731071321_AddedEventInboxAndOutboxTables")]
+    partial class AddedEventInboxAndOutboxTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,7 +88,7 @@ namespace Abp.BankManagement.Migrations
                     b.Property<DateTime>("OpenedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 7, 31, 7, 13, 37, 587, DateTimeKind.Utc).AddTicks(7935));
+                        .HasDefaultValue(new DateTime(2025, 7, 31, 7, 13, 20, 462, DateTimeKind.Utc).AddTicks(6302));
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier")
@@ -373,7 +376,7 @@ namespace Abp.BankManagement.Migrations
                     b.Property<DateTime>("TransactionDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 7, 31, 7, 13, 37, 588, DateTimeKind.Utc).AddTicks(1465));
+                        .HasDefaultValue(new DateTime(2025, 7, 31, 7, 13, 20, 462, DateTimeKind.Utc).AddTicks(9118));
 
                     b.Property<Guid>("TransactionTypeId")
                         .HasColumnType("uniqueidentifier");

@@ -10,7 +10,7 @@ using Volo.Abp.MultiTenancy;
 namespace Abp.BankManagement.Etos.CustomerEtos
 {
     [EventName("Customer.Created")]
-    public class CustomerCreateEto : EtoBase,IMultiTenant
+    public class CustomerCreateEto : EtoBase
     {
         public Guid CustomerId { get; set; }
         public Guid? TenantId { get; set; }

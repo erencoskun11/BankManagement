@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Abp.BankManagement.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.Libs;
+using Volo.Abp.Caching;
+using Volo.Abp.Caching.StackExchangeRedis;
 
 namespace Abp.BankManagement
 {
@@ -32,57 +35,80 @@ namespace Abp.BankManagement
                     .UseSerilog()
                     .UseAutofac();
 
-                var connectionString = builder.Configuration.GetConnectionString("Default");
+                var configuration = builder.Configuration;
 
+                // EF Core DbContext ve varsayılan repository'ler
                 builder.Services.AddAbpDbContext<BankManagementDbContext>(options =>
                 {
                     options.AddDefaultRepositories(includeAllEntities: true);
                 });
 
+                // ABP uygulama modülünü yükle
                 builder.Services.AddApplication<BankManagementHttpApiHostModule>();
 
-                // Buraya eklendi:
+                // ABP MVC ayarları (libs kontrolünü kapatıyoruz)
                 builder.Services.Configure<AbpMvcLibsOptions>(options =>
                 {
                     options.CheckLibs = false;
                 });
 
-                // Swagger servisini ekle
+                // Swagger
                 builder.Services.AddSwaggerGen();
 
-                // CSRF (Antiforgery) korumasını devre dışı bırak
+                // MVC ve Antiforgery ayarları
                 builder.Services.AddControllersWithViews(options =>
                 {
                     options.Filters.Add(new IgnoreAntiforgeryTokenAttribute());
                 });
                 builder.Services.AddAntiforgery(options => options.SuppressXFrameOptionsHeader = true);
 
-                // Dynamic API Controller'ları tamamen devre dışı bırak
+                // ABP konvansiyonel controller'ları override etme (opsiyonel)
                 builder.Services.Configure<AbpAspNetCoreMvcOptions>(options =>
                 {
                     options.ConventionalControllers.Create(typeof(BankManagementApplicationModule).Assembly, opts =>
                     {
-                        opts.TypePredicate = type => false; // ApplicationService tabanlı controller oluşturulmaz
+                        opts.TypePredicate = type => false;
                     });
+                });
+
+                // CORS ayarları
+                var corsOrigins = configuration["App:CorsOrigins"]
+                    ?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(o => o.Trim())
+                    .ToArray() ?? Array.Empty<string>();
+
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("Default", policy =>
+                    {
+                        policy.WithOrigins(corsOrigins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    });
+                });
+
+              
+
+                // KeyPrefix ayarı (isteğe bağlı)
+                builder.Services.Configure<AbpDistributedCacheOptions>(options =>
+                {
+                    options.KeyPrefix = "BankManagement:";
                 });
 
                 var app = builder.Build();
 
                 await app.InitializeApplicationAsync();
 
-                // Swagger middleware
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "BankManagement API V1");
-                    c.RoutePrefix = string.Empty; // Swagger ana sayfada
+                    c.RoutePrefix = string.Empty;
                 });
 
                 app.UseRouting();
-
-                // Authentication/Authorization devre dışı
-                // app.UseAuthentication();
-                // app.UseAuthorization();
+                app.UseCors("Default");
                 app.MapControllers();
 
                 await app.RunAsync();
