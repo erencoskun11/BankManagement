@@ -31,6 +31,8 @@ using Volo.Abp.AspNetCore.MultiTenancy;
 using Abp.BankManagement.MultiTenancy;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using Volo.Abp.Caching.StackExchangeRedis;
+using Volo.Abp.Caching;
 
 namespace Abp.BankManagement
 {
@@ -44,7 +46,8 @@ namespace Abp.BankManagement
         typeof(AbpAccountWebOpenIddictModule),
         typeof(AbpAspNetCoreSerilogModule),
         typeof(AbpSwashbuckleModule),
-        typeof(AbpEventBusRabbitMqModule)
+        typeof(AbpEventBusRabbitMqModule),
+        typeof(AbpCachingStackExchangeRedisModule) // Redis modülü eklendi
     )]
     public class BankManagementHttpApiHostModule : AbpModule
     {
@@ -80,7 +83,8 @@ namespace Abp.BankManagement
             ConfigureConventionalControllers();
             ConfigureCors(context, configuration);
             ConfigureSwagger(configuration, context);
-            ConfigureRabbitMq(configuration, context);   // Güncellenen metot
+            ConfigureRabbitMq(configuration, context);
+            ConfigureRedis(context); // Redis konfigürasyonu eklendi
             DisableAntiforgery(context);
         }
 
@@ -162,13 +166,20 @@ namespace Abp.BankManagement
 
         private void ConfigureRabbitMq(IConfiguration configuration, ServiceConfigurationContext context)
         {
-            // Burada JSON içindeki "RabbitMQ" kökünü ve altýndaki EventBus bölümünü okuyalým
             var rabbitSection = configuration.GetSection("RabbitMQ:EventBus");
             context.Services.Configure<AbpRabbitMqEventBusOptions>(opts =>
             {
                 opts.ClientName = rabbitSection["ClientName"];
                 opts.ExchangeName = rabbitSection["ExchangeName"];
-                opts.ConnectionName = "Default"; // appsettings içindeki Connections:Default
+                opts.ConnectionName = "Default";
+            });
+        }
+
+        private void ConfigureRedis(ServiceConfigurationContext context)
+        {
+            context.Services.Configure<AbpDistributedCacheOptions>(options =>
+            {
+                options.KeyPrefix = "BankManagement:"; // Cache key prefix
             });
         }
 

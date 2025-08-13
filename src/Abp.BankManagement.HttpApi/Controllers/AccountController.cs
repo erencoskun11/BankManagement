@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Abp.BankManagement.Attributes;
+using Abp.BankManagement.Caching;
 using Abp.BankManagement.Dtos.AccountDtos;
 using Abp.BankManagement.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -27,11 +29,13 @@ namespace Abp.BankManagement.Controllers
         /// <param name="dto"></param>
         /// <returns></returns>
         [HttpPost]
+        [CacheRefresh(typeof(AccountCacheKeys), nameof(AccountCacheKeys.ListKey), nameof(AccountCacheKeys.Last10Key))]
         public async Task<bool> Create([FromBody]CreateAccountDto dto)
         {
             return await _service.CreateAsync(dto);
         }
         [HttpPost("bulk-create")]
+        [CacheRefresh(typeof(AccountCacheKeys), nameof(AccountCacheKeys.ListKey), nameof(AccountCacheKeys.Last10Key))]
         public async Task<bool> BulkCreateAsync([FromBody] List<CreateAccountDto> accounts)
         {
             return await _service.BulkCreateAsync(accounts);
@@ -41,6 +45,7 @@ namespace Abp.BankManagement.Controllers
 
 
         [HttpDelete("{id}")]
+        [CacheRefresh(typeof(AccountCacheKeys), nameof(AccountCacheKeys.ListKey), nameof(AccountCacheKeys.Last10Key))]
         public async Task<bool>Delete(Guid id)
         {
             return await _service.DeleteAsync(id);
@@ -58,6 +63,7 @@ namespace Abp.BankManagement.Controllers
         }
 
         [HttpPut]
+        [CacheRefresh(typeof(AccountCacheKeys), nameof(AccountCacheKeys.ListKey), nameof(AccountCacheKeys.Last10Key))]
         public async Task<bool> Update([FromBody] UpdateAccountDto dto)
         {
             return await _service.UpdateAsync(dto);
