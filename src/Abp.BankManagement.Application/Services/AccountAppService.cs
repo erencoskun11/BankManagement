@@ -1,4 +1,5 @@
-﻿using Abp.BankManagement.Caching;
+
+using Abp.BankManagement.Caching;
 using Abp.BankManagement.Dtos.AccountDtos;
 using Abp.BankManagement.Entities;
 using Abp.BankManagement.ExceptionCodes;
@@ -16,6 +17,7 @@ using Volo.Abp.Application.Services;
 using Volo.Abp.EventBus.Distributed;
 using Volo.Abp.Caching;
 using Microsoft.Extensions.Caching.Distributed;
+//middleware ile generic api response oluşturulacak. Domain Shared içerisine. 
 
 namespace Abp.BankManagement.Services
 {
@@ -29,7 +31,6 @@ namespace Abp.BankManagement.Services
 
         private static readonly DistributedCacheEntryOptions _defaultCacheOptions = new DistributedCacheEntryOptions
         {
-            //SlidingExpiration = TimeSpan.FromMinutes(5),
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
         };
 
@@ -153,7 +154,7 @@ namespace Abp.BankManagement.Services
             var key = AccountCacheKeys.ItemKey(id);
 
             var cached = await _accountCache.GetAsync(key);
-            if(cached !=null)
+            if (cached != null)
             {
                 return cached;
             }
@@ -187,12 +188,11 @@ namespace Abp.BankManagement.Services
             return mapped;
         }
 
-
         public async Task<List<AccountDto>> GetLast10CreatedAccountAsync()
         {
             var key = AccountCacheKeys.Last10Key;
             var cached = await _accountsCache.GetAsync(key);
-            if(cached != null )
+            if (cached != null)
             {
                 return cached;
             }
@@ -200,7 +200,7 @@ namespace Abp.BankManagement.Services
             var mapped = ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
             await Task.Delay(10000);
 
-            await _accountsCache.SetAsync(key,mapped, _defaultCacheOptions);
+            await _accountsCache.SetAsync(key, mapped, _defaultCacheOptions);
             return mapped;
         }
 
@@ -208,31 +208,22 @@ namespace Abp.BankManagement.Services
         {
             var key = AccountCacheKeys.ListByCustomer(customerId);
             var cached = await _accountsCache.GetAsync(key);
-            if(cached !=null)
+            if (cached != null)
             {
                 await Task.Delay(10000);
                 return cached;
             }
 
             var accounts = await _accountRepository.GetListAsync(x => x.CustomerId == customerId);
-           if(accounts == null || accounts.Count == 0)
-           {
+            if (accounts == null || accounts.Count == 0)
+            {
                 throw new UserFriendlyException($"No account found for customerId '{customerId}'.");
-           }
+            }
 
             var mapped = ObjectMapper.Map<List<Account>, List<AccountDto>>(accounts);
-            await _accountsCache.SetAsync(key,mapped, _defaultCacheOptions);
-            
-            return mapped;
-<<<<<<< Updated upstream
-        
-        
-        
-        
-        
-=======
+            await _accountsCache.SetAsync(key, mapped, _defaultCacheOptions);
 
->>>>>>> Stashed changes
+            return mapped;
         }
 
         public async Task<bool> UpdateAsync(UpdateAccountDto input)
@@ -284,6 +275,7 @@ namespace Abp.BankManagement.Services
             }
             catch
             {
+                // Ignore if not found
             }
 
             await _accountRepository.DeleteAsync(id);
