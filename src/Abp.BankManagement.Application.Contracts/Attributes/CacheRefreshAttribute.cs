@@ -17,7 +17,6 @@ namespace Abp.BankManagement.Attributes
         private readonly string[] _memberNames;
         private const string HttpContextItemsKey = "CacheRefresh:Keys";
 
-        // Usage: [CacheRefresh(typeof(AccountCacheKeys), "ListKey", "Last10Key")]
         public CacheRefreshAttribute(Type keyContainerType, params string[] memberNames)
         {
             _keyContainerType = keyContainerType ?? throw new ArgumentNullException(nameof(keyContainerType));
@@ -26,13 +25,10 @@ namespace Abp.BankManagement.Attributes
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // action'ı çalıştır
             var resultContext = await next();
 
-            // exception varsa işlem yapma
             if (resultContext.Exception != null) return;
 
-            // Reflection ile member'ları çöz, fakat silme işini OnResultExecuted'e bırak
             var keys = new List<string>();
             var logger = context.HttpContext.RequestServices.GetService<ILogger<CacheRefreshAttribute>>();
 
@@ -63,19 +59,16 @@ namespace Abp.BankManagement.Attributes
                 }
             }
 
-            // anahtarları HttpContext.Items'a koy (OnResultExecuted orada kullanacak)
             if (keys.Any())
             {
                 context.HttpContext.Items[HttpContextItemsKey] = keys;
             }
         }
 
-        // Mentorun önerdiği method: sonucu gördükten sonra (status code kontrolü vb.) cache'i sil
         public override void OnResultExecuted(ResultExecutedContext context)
         {
             var logger = context.HttpContext.RequestServices.GetService<ILogger<CacheRefreshAttribute>>();
 
-            // Sadece başarılı HTTP durum kodlarında (2xx) cache'i temizle
             var status = context.HttpContext.Response?.StatusCode ?? 0;
             if (status < 200 || status >= 300)
             {
@@ -83,7 +76,6 @@ namespace Abp.BankManagement.Attributes
                 return;
             }
 
-            // Get keys from Items
             if (!context.HttpContext.Items.TryGetValue(HttpContextItemsKey, out var obj) || obj == null)
             {
                 logger?.LogDebug("No cache keys were registered for refresh.");
@@ -107,7 +99,6 @@ namespace Abp.BankManagement.Attributes
             {
                 try
                 {
-                    // IDistributedCache interface'inde synchronous Remove() metodu da var — burada kullanıyoruz.
                     cache.Remove(key);
                     logger?.LogDebug("Removed cache key: {CacheKey}", key);
                 }
@@ -117,7 +108,6 @@ namespace Abp.BankManagement.Attributes
                 }
             }
 
-            // temizleyelim
             context.HttpContext.Items.Remove(HttpContextItemsKey);
         }
     }
