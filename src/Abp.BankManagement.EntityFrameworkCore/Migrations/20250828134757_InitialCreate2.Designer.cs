@@ -4,6 +4,7 @@ using Abp.BankManagement.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Abp.BankManagement.Migrations
 {
     [DbContext(typeof(BankManagementDbContext))]
-    partial class BankManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250828134757_InitialCreate2")]
+    partial class InitialCreate2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,7 +88,7 @@ namespace Abp.BankManagement.Migrations
                     b.Property<DateTime>("OpenedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 8, 28, 14, 9, 0, 941, DateTimeKind.Utc).AddTicks(4979));
+                        .HasDefaultValue(new DateTime(2025, 8, 28, 13, 47, 55, 890, DateTimeKind.Utc).AddTicks(874));
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier")
@@ -373,7 +376,7 @@ namespace Abp.BankManagement.Migrations
                     b.Property<DateTime>("TransactionDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 8, 28, 14, 9, 0, 942, DateTimeKind.Utc).AddTicks(247));
+                        .HasDefaultValue(new DateTime(2025, 8, 28, 13, 47, 55, 890, DateTimeKind.Utc).AddTicks(5059));
 
                     b.Property<Guid>("TransactionTypeId")
                         .HasColumnType("uniqueidentifier");
