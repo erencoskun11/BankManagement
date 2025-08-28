@@ -19,7 +19,7 @@ namespace Abp.BankManagement.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("_Abp_DatabaseProvider", EfCoreDatabaseProvider.SqlServer)
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -85,7 +85,7 @@ namespace Abp.BankManagement.Migrations
                     b.Property<DateTime>("OpenedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 7, 31, 7, 13, 37, 587, DateTimeKind.Utc).AddTicks(7935));
+                        .HasDefaultValue(new DateTime(2025, 8, 28, 14, 9, 0, 941, DateTimeKind.Utc).AddTicks(4979));
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uniqueidentifier")
@@ -373,7 +373,7 @@ namespace Abp.BankManagement.Migrations
                     b.Property<DateTime>("TransactionDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasDefaultValue(new DateTime(2025, 7, 31, 7, 13, 37, 588, DateTimeKind.Utc).AddTicks(1465));
+                        .HasDefaultValue(new DateTime(2025, 8, 28, 14, 9, 0, 942, DateTimeKind.Utc).AddTicks(247));
 
                     b.Property<Guid>("TransactionTypeId")
                         .HasColumnType("uniqueidentifier");
