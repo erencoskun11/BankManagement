@@ -1,3 +1,4 @@
+
 using Abp.BankManagement.Caching;
 using Abp.BankManagement.Dtos.AccountDtos;
 using Abp.BankManagement.Entities;
@@ -291,4 +292,3 @@ namespace Abp.BankManagement.Services
         }
     }
 }
-
