@@ -11,7 +11,7 @@ namespace Abp.BankManagement.Services
         Task<List<AccountDto>> GetListAsync();
         Task<bool>CreateAsync(CreateAccountDto input);
 
-        Task<bool>BulkCreateAsync(List<CreateAccountDto> accounts);
+        Task<bool>  BulkCreateAsync(List<CreateAccountDto> accounts);
         Task<bool> UpdateAsync(UpdateAccountDto input);
 
         Task<bool> DeleteAsync(Guid id);

@@ -13,6 +13,7 @@ namespace Abp.BankManagement.Repositories
         Task<List<Account>> GetLast10CreatedAccountAsync();
         Task<Account> GetByIbanAsync(string iban,CancellationToken cancellationToken);
         Task<List<Account>> GetAccountsByTenantIdAsync(Guid tenantId);
+        Task CreateListAsync(List<Account> accounts,CancellationToken cancellationToken = default);
     }
 }
 

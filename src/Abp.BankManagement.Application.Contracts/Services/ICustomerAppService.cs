@@ -1,4 +1,5 @@
-﻿using Abp.BankManagement.Dtos.CustomerDtos;
+﻿using Abp.BankManagement.Dtos.AccountDtos;
+using Abp.BankManagement.Dtos.CustomerDtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

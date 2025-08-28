@@ -13,9 +13,5 @@ namespace Abp.BankManagement.Caching
         public static string ItemKey(Guid id) => Prefix + $"Item:{id}";
         public static string ListByCustomer(Guid customerId) => Prefix + $"Customer:{customerId}:All";
         public static string Last10Key => Prefix + "Last10";
-
-
-
-
     }
 }
