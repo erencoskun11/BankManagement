@@ -1,32 +1,27 @@
-﻿using System.IO;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using System.IO;
+using System;
+using Abp.BankManagement.EntityFrameworkCore;
 
-namespace Abp.BankManagement.EntityFrameworkCore;
-
-/* This class is needed for EF Core console commands
- * (like Add-Migration and Update-Database commands) */
 public class BankManagementDbContextFactory : IDesignTimeDbContextFactory<BankManagementDbContext>
 {
     public BankManagementDbContext CreateDbContext(string[] args)
     {
-        BankManagementEfCoreEntityExtensionMappings.Configure();
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
 
-        var configuration = BuildConfiguration();
+        var optionsBuilder = new DbContextOptionsBuilder<BankManagementDbContext>();
+        var conn = config.GetConnectionString("Default")
+                   ?? "Server=(localdb)\\MSSQLLocalDB;Database=BankManagementDb_alt;Trusted_Connection=True;";
 
-        var builder = new DbContextOptionsBuilder<BankManagementDbContext>()
-            .UseSqlServer(configuration.GetConnectionString("Default"));
+        optionsBuilder.UseSqlServer(conn,
+            sql => sql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
 
-        return new BankManagementDbContext(builder.Options);
-    }
-
-    private static IConfigurationRoot BuildConfiguration()
-    {
-        var builder = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../Abp.BankManagement.DbMigrator/"))
-            .AddJsonFile("appsettings.json", optional: false);
-
-        return builder.Build();
+        return new BankManagementDbContext(optionsBuilder.Options);
     }
 }
