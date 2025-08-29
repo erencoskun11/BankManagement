@@ -17,7 +17,7 @@ namespace Abp.BankManagement.Repositories
             : base(dbContextProvider)
         {
         }
-       
+
         public async Task<List<Account>> GetAccountByCustomerIdAsync(Guid customerId)
         {
             var dbSet = await GetDbSetAsync();
@@ -46,7 +46,13 @@ namespace Abp.BankManagement.Repositories
             return await dbSet
                 .Where(a => a.TenantId == tenantId)
                 .ToListAsync();
-        } 
+        }
+
+        public async Task CreateListAsync(List<Account> accounts, CancellationToken cancellationToken = default)
+        {
+            var dbSet = await GetDbSetAsync();
+            await dbSet.AddRangeAsync(accounts, cancellationToken);
+        }
     }
 }
 
